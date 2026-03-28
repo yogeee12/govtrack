@@ -22,11 +22,14 @@ for filepath in all_files:
     source_file = os.path.basename(filepath)
 
     # Check if source_file already exists in database
-    query = f"SELECT COUNT(*) FROM {TABLE_NAME} WHERE source_file = '{source_file}'"
-    result = pd.read_sql(query, con=engine)
-    if result.iloc[0, 0] > 0:
-        print(f" Skipped - {source_file} already exists in database")
-        continue
+    try:
+        query = f"SELECT COUNT(*) FROM {TABLE_NAME} WHERE source_file = '{source_file}'"
+        result = pd.read_sql(query, con=engine)
+        if result.iloc[0, 0] > 0:
+            print(f" Skipped - {source_file} already exists in database")
+            continue
+    except:
+        pass
 
     try:
         df = run_road_pipeline(filepath)
@@ -37,7 +40,7 @@ for filepath in all_files:
         # First file replaces tables, rest append
         mode = 'replace' if first else 'append'
         df['source_file'] = source_file
-        df.to_sql(TABLE_NAME, con=engine, if_exists=mode, index=True)
+        df.to_sql(TABLE_NAME, con=engine, if_exists=mode, index=False)
         print(f' Loaded {len(df)} rows ({mode} | Anomalies : {(df["Anomaly"] == -1).sum()})')
         first = False
 

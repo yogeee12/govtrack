@@ -1,11 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GovTrack</title>
-</head>
-<body>
-    <h1>GovTrack is Running</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero">
+    <h1>GovTrack</h1>
+    <p>Government Project Transparency Portal — Powered by Machine Learning</p>
+    <p>Analysing PMGSY rural road projects across India using real government data</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h2>{{ total }}</h2>
+        <p>Total Projects</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ total_km }} km</h2>
+        <p>Road Length Analysed</p>
+    </div>
+    <div class="stat-card anomaly">
+        <h2>{{ anomalies }}</h2>
+        <p>Anomalies Flagged</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ states }}</h2>
+        <p>States Covered</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ schemes }}</h2>
+        <p>Schemes Analysed</p>
+    </div>
+</div>
+
+<div class="cta-grid">
+    <a href="/projects" class="cta-card">🔍 Explore Projects</a>
+    <a href="/anomalies" class="cta-card red">⚠️ View Anomalies</a>
+    <a href="/dashboard" class="cta-card">📊 Dashboard</a>
+    <a href="/estimator" class="cta-card">💰 Cost Estimator</a>
+</div>
+{% endblock %}

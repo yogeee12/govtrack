@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>⚠️ Anomaly Alert — ML Flagged Projects</h2>
+<p>These {{ projects|length }} projects were flagged by the Isolation Forest model as statistically unusual. Lower anomaly score = more suspicious.</p>
+
+<form method="GET" class="filter-form">
+    <select name="state">
+        <option value="">All States</option>
+        {% for s in states %}
+        <option value="{{ s }}" {% if s == selected_state %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>District</th><th>State</th><th>Scheme</th>
+            <th>Cost/km</th><th>Completion</th><th>Fin. Progress</th>
+            <th>Project Age</th><th>Anomaly Score</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in projects %}
+    <tr class="anomaly-row">
+        <td>{{ p['District Name'] }}</td>
+        <td>{{ p.State }}</td>
+        <td>{{ p.Scheme }}</td>
+        <td>{{ '%.1f'|format(p['Cost Per Km']) if p['Cost Per Km'] else '-' }}</td>
+        <td>{{ '%.0f%%'|format(p['Completion Ratio']*100) if p['Completion Ratio'] else '-' }}</td>
+        <td>{{ '%.0f%%'|format(p['Financial Progress']*100) if p['Financial Progress'] else '-' }}</td>
+        <td>{{ p['Project Age'] }} yrs</td>
+        <td>{{ '%.4f'|format(p.Anomaly_Score) if p.Anomaly_Score else '-' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

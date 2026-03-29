@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Project Explorer</h2>
+
+<form method="GET" class="filter-form">
+    <select name="state">
+        <option value="">All States</option>
+        {% for s in states %}
+        <option value="{{ s }}" {% if s == selected_state %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="district">
+        <option value="">All Districts</option>
+        {% for d in districts %}
+        <option value="{{ d }}" {% if d == selected_district %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="scheme">
+        <option value="">All Schemes</option>
+        {% for sc in schemes %}
+        <option value="{{ sc }}" {% if sc == selected_scheme %}selected{% endif %}>{{ sc }}</option>
+        {% endfor %}
+    </select>
+
+    <label><input type="checkbox" name="anomaly" value="1" {% if anomaly_only == '1' %}checked{% endif %}> Anomalies Only</label>
+    <button type="submit">Filter</button>
+</form>
+
+<p>Showing {{ projects|length }} projects</p>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>District</th><th>State</th><th>Scheme</th>
+            <th>Road (km)</th><th>Cost (L)</th><th>Cost/km</th>
+            <th>Completion</th><th>Stage</th><th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in projects %}
+    <tr {% if p.Anomaly == -1 %}class="anomaly-row"{% endif %}>
+        <td>{{ p['District Name'] }}</td>
+        <td>{{ p.State }}</td>
+        <td>{{ p.Scheme }}</td>
+        <td>{{ p['Road Length (Kms)'] }}</td>
+        <td>{{ p['Sanction Cost'] }}</td>
+        <td>{{ '%.1f'|format(p['Cost Per Km']) if p['Cost Per Km'] else '-' }}</td>
+        <td>{{ '%.0f%%'|format(p['Completion Ratio']*100) if p['Completion Ratio'] else '-' }}</td>
+        <td>{{ p['Stage of Progress'] }}</td>
+        <td>
+            {% if p.Anomaly == -1 %}
+            <span class="badge-red">⚠️ Anomaly</span>
+            {% else %}
+            <span class="badge-green">✓ Normal</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

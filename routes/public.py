@@ -13,10 +13,10 @@ TABLE = "road_projects"
 def home():
     with db.engine.connect() as conn:
         total = conn.execute(text(f"SELECT COUNT(*) FROM {TABLE}")).scalar()
-        total_km = conn.execute(text(f"SELECT ROUND(SUM('Road Lenght (kms)'),1) FROM {TABLE}")).scalar()
-        anomalies = conn.execute(text(f"SELECT COUNT(*) FORM {TABLE} WHERE Anomaly = -1")).scalar()
+        total_km = conn.execute(text(f"SELECT ROUND(SUM('Road Length (kms)'),1) FROM {TABLE}")).scalar()
+        anomalies = conn.execute(text(f"SELECT COUNT(*) FROM {TABLE} WHERE Anomaly = -1")).scalar()
         state = conn.execute(text(f"SELECT COUNT(DISTINCT State) FROM {TABLE}")).scalar()
-        scheme = conn.execute(text(f"SELECT COUNT(DISTIINCT Scheme) FROM {TABLE}")).scalar()
+        scheme = conn.execute(text(f"SELECT COUNT(DISTINCT Scheme) FROM {TABLE}")).scalar()
 
     return render_template('index.html', total=total, total_km=total_km, anomalies=anomalies, state=state, scheme=scheme)
 
@@ -24,7 +24,7 @@ def home():
 def dashboard():
     with db.engine.connect() as conn:
         # Stage of progress distribution
-        stage = pd.read_sql(text(f"SELECT 'Stage of progress', count(*) as cnt FROM {TABLE} GROUP BY 'Stage of Progress' ORDER BY cnt DESC"),conn)
+        stage = pd.read_sql(text(f"SELECT 'Stage of Progress', count(*) as cnt FROM {TABLE} GROUP BY 'Stage of Progress' ORDER BY cnt DESC"),conn)
         # Road length by district (top 10)
         district = pd.read_sql(text(f"SELECT 'District Name', ROUND(SUM('Road Length (Kms)'),1) as km FROM {TABLE} GROUP BY 'District Name' ORDER BY km DESC LIMIT 10"),conn)
         # Anomalies by district (top 10)
@@ -34,12 +34,12 @@ def dashboard():
 
         return render_template('dashboard.html',
                                stage_data = json.dumps({'labels': stage['Stage of Progress'].tolist(), 'values': stage['cnt'].tolist()}),
-                               district_data = json.dumps({'labels': district['Stage of Progress'].tolist(), 'values': district['cnt'].tolist()}),
-                               anomaly_data = json.dumps({'labels': anom_dist['Stage of Progress'].tolist(), 'values': anom_dist['cnt'].tolist()}),
-                               state_data = json.dumps({'labels': by_state['Stage of Progress'].tolist(), 'values': by_state['cnt'].tolist()}),
+                               district_data = json.dumps({'labels': district['District Name'].tolist(), 'values': district['km'].tolist()}),
+                               anomaly_data = json.dumps({'labels': anom_dist['District Name'].tolist(), 'values': anom_dist['cnt'].tolist()}),
+                               state_data = json.dumps({'labels': by_state['State'].tolist(), 'values': by_state['cnt'].tolist()}),
                                )
 
-@bp.route('/estimator', method=['GET','POST'])
+@bp.route('/estimator', methods=['GET','POST'])
 def estimator():
     result = None
     #get filter option for dropdowns

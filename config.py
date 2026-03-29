@@ -1,5 +1,4 @@
 class Config:
-    MYSQL_HOST = "localhost"
-    MYSQL_USER = "root"
-    MYSQL_PASSWORD = "E=mc*2"
-    MYSQL_DB = "govtrack"
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:E=mc*2@localhost/govtrack"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = 'govtrack2026'

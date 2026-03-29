@@ -31,12 +31,12 @@ def projects():
     if anomaly_only == '1':
         where.append("'Anomaly' = -1")
 
-    where_sql = "WHERE"+"AND".join(where) if where else ""
+    where_sql = "WHERE"+" AND ".join(where) if where else ""
     query = f"SELECT * FROM {TABLE} {where_sql} LIMIT 500"
 
     with db.engine.connect() as conn:
         df = pd.read_sql(text(query), conn, params=params)
-        districts = pd.read_sql(text(f"SELECT DISTINCT 'District Name' FROM {TABLE} OREDR BY 'District Name'"), conn)['District Name'].tolist()
+        districts = pd.read_sql(text(f"SELECT DISTINCT 'District Name' FROM {TABLE} ORDER BY 'District Name'"), conn)['District Name'].tolist()
         states = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY State"), conn)["State"].tolist()
         schemes = pd.read_sql(text(f"SELECT DISTINCT Scheme FROM {TABLE} ORDER BY Scheme"), conn)["Scheme"].tolist()
 
@@ -47,13 +47,13 @@ def projects():
                 selected_scheme=scheme, anomaly_only=anomaly_only
                 )
     
-bp.route('/anomalies')
+@bp.route('/anomalies')
 def anomalies():
     state = request.args.get('state','')
     where = "WHERE Anomaly = -1"
     params = {}
     if state:
-        where += " AND State = :state"
+        where += " AND State = :state" 
         params['state'] = state
 
     with db.engine.connect() as conn:
@@ -61,7 +61,7 @@ def anomalies():
             text(f"SELECT * FROM {TABLE} {where} ORDER BY Anomaly_Score ASC LIMIT 500"),
             conn, params = params
         )
-        states = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY state"),conn)["state"].tolist()
+        states = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY State"),conn)["State"].tolist()
 
     return render_template('anomalies.html',
                            projects = df.to_dict('records'),

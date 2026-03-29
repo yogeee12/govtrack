@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📊 Dashboard</h2>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3>Stage of Progress</h3>
+        <canvas id="stageChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Road Length by District (Top 10)</h3>
+        <canvas id="districtChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Anomalies by District (Top 10)</h3>
+        <canvas id="anomChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Projects by State</h3>
+        <canvas id="stateChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const stage = {{ stage_data | safe }};
+const district = {{ district_data | safe }};
+const anom = {{ anom_data | safe }};
+const state = {{ state_data | safe }};
+
+new Chart(document.getElementById('stageChart'), {
+    type: 'doughnut',
+    data: { labels: stage.labels, datasets: [{ data: stage.values, backgroundColor: ['#28a745','#17a2b8','#ffc107','#dc3545','#6c757d','#fd7e14','#6f42c1'] }] }
+});
+new Chart(document.getElementById('districtChart'), {
+    type: 'bar',
+    data: { labels: district.labels, datasets: [{ label: 'KM Built', data: district.values, backgroundColor: '#17a2b8' }] },
+    options: { indexAxis: 'y' }
+});
+new Chart(document.getElementById('anomChart'), {
+    type: 'bar',
+    data: { labels: anom.labels, datasets: [{ label: 'Anomalies', data: anom.values, backgroundColor: '#dc3545' }] },
+    options: { indexAxis: 'y' }
+});
+new Chart(document.getElementById('stateChart'), {
+    type: 'pie',
+    data: { labels: state.labels, datasets: [{ data: state.values, backgroundColor: ['#007bff','#28a745','#ffc107','#dc3545'] }] }
+});
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from pipeline.govtrack_pipeline import run_road_pipeline
 
 DB_URL = "mysql+pymysql://root:E=mc*2@localhost/govtrack"
-Data_DIR = r"C:\Users\yoges\OneDrive\Desktop\Final_year_project\GovTrack\data"
+Data_DIR = r"C:\Users\yoges\OneDrive\Desktop\Final_year_project\govtrack\data"
 TABLE_NAME = "road_projects"
 
 engine = create_engine(DB_URL)

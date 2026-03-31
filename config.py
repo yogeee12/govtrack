@@ -1,4 +1,8 @@
-class Config:
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:E=mc*2@localhost/govtrack"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = 'govtrack2026'
+import os
+
+SQLALCHEMY_DATABASE_URI = (
+    f"mysql+pymysql://{os.getenv('DB_USER')}:"
+    f"{os.getenv('DB_PASSWORD')}@"
+    f"{os.getenv('DB_HOST')}/"
+    f"{os.getenv('DB_NAME')}"
+)

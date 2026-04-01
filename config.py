@@ -1,8 +1,11 @@
 import os
 
-SQLALCHEMY_DATABASE_URI = (
-    f"mysql+pymysql://{os.getenv('DB_USER')}:"
-    f"{os.getenv('DB_PASSWORD')}@"
-    f"{os.getenv('DB_HOST')}/"
-    f"{os.getenv('DB_NAME')}"
-)
+class Config:
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    uri = os.environ.get("DATABASE_URL")
+
+    if uri and uri.startswith("mysql://"):
+        uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = uri

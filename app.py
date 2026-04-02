@@ -11,7 +11,5 @@ from routes.projects import bp as projects_bp
 app.register_blueprint(public_bp)
 app.register_blueprint(projects_bp)
 
-app.add_url_rule('/path', 'endpoint', methods=['GET', 'POST'])
-
 if __name__ == "__main__":
     app.run(debug=True)

@@ -13,7 +13,7 @@ TABLE = "road_projects"
 def home():
     with db.engine.connect() as conn:
         total = conn.execute(text(f"SELECT COUNT(*) FROM {TABLE}")).scalar()
-        total_km = conn.execute(text(f"SELECT ROUND(SUM('Road Length (kms)'),1) FROM {TABLE}")).scalar()
+        total_km = conn.execute(text(f"SELECT ROUND(SUM(`Road Length (Kms)`),1) FROM {TABLE}")).scalar()
         anomalies = conn.execute(text(f"SELECT COUNT(*) FROM {TABLE} WHERE Anomaly = -1")).scalar()
         state = conn.execute(text(f"SELECT COUNT(DISTINCT State) FROM {TABLE}")).scalar()
         scheme = conn.execute(text(f"SELECT COUNT(DISTINCT Scheme) FROM {TABLE}")).scalar()

@@ -24,11 +24,11 @@ def home():
 def dashboard():
     with db.engine.connect() as conn:
         # Stage of progress distribution
-        stage = pd.read_sql(text(f"SELECT 'Stage of Progress', count(*) as cnt FROM {TABLE} GROUP BY 'Stage of Progress' ORDER BY cnt DESC"),conn)
+        stage = pd.read_sql(text(f"SELECT `Stage of Progress`, count(*) as cnt FROM {TABLE} GROUP BY `Stage of Progress` ORDER BY cnt DESC"),conn)
         # Road length by district (top 10)
-        district = pd.read_sql(text(f"SELECT 'District Name', ROUND(SUM('Road Length (Kms)'),1) as km FROM {TABLE} GROUP BY 'District Name' ORDER BY km DESC LIMIT 10"),conn)
+        district = pd.read_sql(text(f"SELECT `District Name`, ROUND(SUM(`Road Length (Kms)`),1) as km FROM {TABLE} GROUP BY `District Name` ORDER BY km DESC LIMIT 10"),conn)
         # Anomalies by district (top 10)
-        anom_dist = pd.read_sql(text(f"SELECT 'District Name', COUNT(*) as cnt FROM {TABLE} WHERE Anomaly = -1 GROUP BY 'District Name' ORDER BY cnt DESC LIMIT 10"), conn)
+        anom_dist = pd.read_sql(text(f"SELECT `District Name`, COUNT(*) as cnt FROM {TABLE} WHERE Anomaly = -1 GROUP BY `District Name` ORDER BY cnt DESC LIMIT 10"), conn)
         # Projects by state
         by_state = pd.read_sql(text(f"SELECT State, COUNT(*) as cnt FROM {TABLE} GROUP BY State ORDER BY cnt DESC"), conn)
 

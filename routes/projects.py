@@ -36,13 +36,13 @@ def projects():
 
     with db.engine.connect() as conn:
         df = pd.read_sql(text(query), conn, params=params)
-        districts = pd.read_sql(text(f"SELECT DISTINCT 'District Name' FROM {TABLE} ORDER BY `District Name`"), conn)['District Name'].tolist()
+        districts = pd.read_sql(text(f"SELECT DISTINCT  `District Name` FROM {TABLE} ORDER BY `District Name`"), conn)['District Name'].tolist()
         states = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY State"), conn)["State"].tolist()
         schemes = pd.read_sql(text(f"SELECT DISTINCT Scheme FROM {TABLE} ORDER BY Scheme"), conn)["Scheme"].tolist()
 
         return render_template("projects.html",
                 projects = df.to_dict('records'),
-                districts = districts, states = states, scheme=schemes,
+                districts = districts, states = states, schemes=schemes,
                 selected_district = district, selected_state = state,
                 selected_scheme=scheme, anomaly_only=anomaly_only
                 )

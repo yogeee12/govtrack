@@ -47,7 +47,7 @@ def estimator():
         district = pd.read_sql(text(f"SELECT DISTINCT 'District Name' FROM {TABLE} ORDER BY 'District Name'"), conn)['District Name'].tolist()
         state = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY state"), conn)
 
-        if request == "POST":
+        if request.method == "POST":
             district = request.form['district']
             road_length = float(request.form['road_length'])
             connectivity = request.form['connectivity']

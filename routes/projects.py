@@ -66,5 +66,3 @@ def anomalies():
     return render_template('anomalies.html',
                            projects = df.to_dict('records'),
                            states= states, selected_state = state)
-
-        

@@ -45,10 +45,10 @@ def estimator():
     #get filter option for dropdowns
     with db.engine.connect() as conn:
         district = pd.read_sql(text(f"SELECT DISTINCT 'District Name' FROM {TABLE} ORDER BY 'District Name'"), conn)['District Name'].tolist()
-        state = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY state"), conn)
+        state = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY state"), conn)['State'].tolist()
 
         if request.method == "POST":
-            district = request.form['district']
+            selected_district = request.form['district']
             road_length = float(request.form['road_length'])
             connectivity = request.form['connectivity']
 
@@ -58,11 +58,11 @@ def estimator():
             le_c = bundle['le_conn']
 
             try:
-                d_enc = le_d.transform([district])[0]
+                d_enc = le_d.transform([selected_district])[0]
                 c_enc = le_c.transform([connectivity])[0]
                 cost_per_km = model.predict([[d_enc, road_length, c_enc]])[0]
                 total = round(cost_per_km * road_length, 2)
-                result = {"cost_per_km" : round(cost_per_km, 2), "total" : total, "district": district, "km":road_length}
+                result = {"cost_per_km" : round(cost_per_km, 2), "total" : total, "district": selected_district, "km":road_length}
             except Exception as e:
                 result = {"error" : str(e)}
 

@@ -3,18 +3,15 @@
 <h2>Project Explorer</h2>
 
 <form method="GET" class="filter-form">
-    <select name="state">
+    <select name="state" id="projState">
         <option value="">All States</option>
         {% for s in states %}
         <option value="{{ s }}" {% if s == selected_state %}selected{% endif %}>{{ s }}</option>
         {% endfor %}
     </select>
 
-    <select name="district">
+    <select name="district" id="projDistrict">
         <option value="">All Districts</option>
-        {% for d in districts %}
-        <option value="{{ d }}" {% if d == selected_district %}selected{% endif %}>{{ d }}</option>
-        {% endfor %}
     </select>
 
     <select name="scheme">
@@ -60,4 +57,33 @@
     {% endfor %}
     </tbody>
 </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const districtsByState = {{ district_by_state | safe }};
+const stateSel = document.getElementById('projState');
+const distSel = document.getElementById('projDistrict');
+const initialDistrict = {{ selected_district | tojson }};
+
+function fillDistricts(useInitial) {
+    const st = stateSel.value;
+    distSel.innerHTML = '<option value="">All Districts</option>';
+    if (!st || !districtsByState[st]) return;
+    districtsByState[st].forEach(function(d) {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        distSel.appendChild(opt);
+    });
+    if (useInitial && initialDistrict) {
+        if (Array.from(distSel.options).some(function(o) { return o.value === initialDistrict; })) {
+            distSel.value = initialDistrict;
+        }
+    }
+}
+
+stateSel.addEventListener('change', function() { fillDistricts(false); });
+if (stateSel.value) { fillDistricts(true); }
+</script>
 {% endblock %}

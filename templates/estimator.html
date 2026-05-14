@@ -1,44 +1,186 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>💰 Road Cost Estimator</h2>
-<p>Enter road details to get a data-driven cost estimate based on historical PMGSY data.</p>
+<div class="estimator-page">
+    <header class="estimator-header">
+        <h2>💰 Road Cost Estimator</h2>
+        <p>Enter road details to get a data-driven cost estimate based on historical PMGSY data.</p>
+    </header>
 
-<div class="estimator-form">
+    <div class="estimator-panel">
     <form method="POST">
+        <div class="estimator-form-grid">
+
         <div class="form-group">
-            <label>District</label>
-            <select name="district" required>
-                {% for d in districts %}
-                <option value="{{ d }}">{{ d }}</option>
+            <label>State</label>
+            <select name="state" id="stateSelect" required>
+                <option value="">Select State</option>
+                {% for s in states %}
+                <option value="{{ s }}" {% if result and result.state == s %}selected{% endif %}>{{ s }}</option>
                 {% endfor %}
             </select>
         </div>
+
+        <div class="form-group">
+            <label>District</label>
+            <select name="district" id="districtSelect" required>
+                <option value="">Select District</option>
+                {% for d in districts %}
+                <option value="{{ d }}" {% if result and result.district == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
         <div class="form-group">
             <label>Road Length (km)</label>
-            <input type="number" name="road_length" step="0.1" min="0.1" required placeholder="e.g. 5.5">
+            <input type="number" name="road_length" id="roadLengthInput"
+                   step="0.1" min="0.1" required placeholder="e.g. 5.5"
+                   value="{{ result.km if result and not result.error else '' }}">
         </div>
+
         <div class="form-group">
             <label>Connectivity Type</label>
             <select name="connectivity">
-                <option value="New">New Road</option>
-                <option value="Upgrade">Upgrade Existing</option>
+                <option value="New" {% if result and result.connectivity == 'New' %}selected{% endif %}>New Road</option>
+                <option value="Upgrade" {% if result and result.connectivity == 'Upgrade' %}selected{% endif %}>Upgrade Existing</option>
             </select>
         </div>
-        <button type="submit" class="btn-primary">Estimate Cost</button>
+
+        <div class="form-group">
+            <label>Scheme</label>
+            <select name="scheme" required>
+                <option value="">Select Scheme</option>
+                {% for sc in schemes %}
+                <option value="{{ sc }}" {% if result and result.scheme == sc %}selected{% endif %}>{{ sc }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary estimator-submit">Estimate Cost</button>
+        </div>
     </form>
 
     {% if result %}
         {% if result.error %}
-        <div class="result-error">Error: {{ result.error }}</div>
+        <div class="result-error">
+            <strong>Error:</strong> {{ result.error }}
+        </div>
+
         {% else %}
         <div class="result-card">
-            <h3>Estimated Cost for {{ result.district }}</h3>
+            <h3>Estimated Cost — {{ result.district }}, {{ result.state }}</h3>
+            <p><strong>Scheme:</strong> {{ result.scheme }}</p>
             <p><strong>Road Length:</strong> {{ result.km }} km</p>
-            <p><strong>Cost per KM:</strong> ₹{{ result.cost_per_km }} Lakhs</p>
+            <p><strong>Predicted Cost per KM:</strong> ₹{{ result.cost_per_km }} Lakhs</p>
             <p class="total-cost"><strong>Total Estimated Cost:</strong> ₹{{ result.total }} Lakhs</p>
-            <small>Based on historical PMGSY data. Actual costs vary by terrain and conditions.</small>
+            <p><strong>District Average:</strong> ₹{{ result.district_avg }} Lakhs/km</p>
         </div>
+
+        <div class="reason-box">
+            <strong>Why this estimate?</strong>
+            <p>{{ result.reason }}</p>
+            <small>Prediction based on {{ real_projects|length }} real PMGSY projects in this district.</small>
+        </div>
+
+        <h3 class="estimator-section-title">Similar Real Projects for Comparison</h3>
+        <div class="data-table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th>Scheme</th>
+                    <th>Road (km)</th>
+                    <th>Cost (L)</th>
+                    <th>Cost/km</th>
+                    <th>Stage</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in real_projects %}
+            <tr {% if p.Anomaly == -1 %}class="anomaly-row"{% endif %}>
+                <td>{{ p['District Name'] }}</td>
+                <td>{{ p.Scheme }}</td>
+                <td>{{ p['Road Length (Kms)'] }}</td>
+                <td>{{ p['Sanction Cost'] }}</td>
+                <td>{{ '%.1f'|format(p['Cost Per Km']) if p['Cost Per Km'] else '-' }}</td>
+                <td>{{ p['Stage of Progress'] }}</td>
+                <td>
+                    {% if p.Anomaly == -1 %}
+                    <span class="badge-red">⚠️ Anomaly</span>
+                    {% else %}
+                    <span class="badge-green">✓ Normal</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+
+        <script>
+        // Values from Flask — embedded as JS variables
+        const costPerKm   = {{ result.cost_per_km }};
+        const districtAvg = {{ result.district_avg }};
+        const currentLen  = {{ result.km }};
+
+        // Create Chart.js bar chart
+        const ctx = document.getElementById('estimatorChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Your Estimate', 'District Average'],
+                datasets: [{
+                    label: 'Total Cost (Lakhs)',
+                    data: [
+                        parseFloat((costPerKm * currentLen).toFixed(2)),
+                        parseFloat((districtAvg * currentLen).toFixed(2))
+                    ],
+                    backgroundColor: ['#1a3a5c', '#17a2b8']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Live update — when road length input changes, bars update
+        document.getElementById('roadLengthInput').addEventListener('input', function() {
+            const newLen = parseFloat(this.value) || 0;
+            chart.data.datasets[0].data[0] = parseFloat((costPerKm * newLen).toFixed(2));
+            chart.data.datasets[0].data[1] = parseFloat((districtAvg * newLen).toFixed(2));
+            chart.update();
+        });
+        </script>
+
         {% endif %}
     {% endif %}
+    </div>
 </div>
+
+<script>
+// State → District filter
+// Flask passes district_by_state as JSON — embedded as JS variable
+const districtsByState = {{ district_by_state | safe }};
+
+document.getElementById('stateSelect').addEventListener('change', function() {
+    const selectedState = this.value;
+    const districtSelect = document.getElementById('districtSelect');
+
+    // Clear current options
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+
+    // Add districts for selected state
+    if (districtsByState[selectedState]) {
+        districtsByState[selectedState].forEach(function(d) {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.text  = d;
+            districtSelect.appendChild(opt);
+        });
+    }
+});
+</script>
+
 {% endblock %}

@@ -1,3 +1,5 @@
 venv/
 __pycache__/
 .env
+GovTrack_Complete_Documentation.md
+docs/

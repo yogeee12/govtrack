@@ -17,15 +17,15 @@ def projects():
     where = [] 
     params = {}
     if district:
-        where.append("`District Name` = :district")
+        where.append("TRIM(`District Name`) = TRIM(:district)")
         params['district'] = district
         
     if state:
-        where.append("`State` = :state")
+        where.append("TRIM(`State`) = TRIM(:state)")
         params['state'] = state
         
     if scheme:
-        where.append("`scheme` = :scheme")
+        where.append("TRIM(`Scheme`) = TRIM(:scheme)")
         params['scheme'] = scheme
         
     if anomaly_only == '1':
@@ -36,13 +36,24 @@ def projects():
 
     with db.engine.connect() as conn:
         df = pd.read_sql(text(query), conn, params=params)
-        districts = pd.read_sql(text(f"SELECT DISTINCT  `District Name` FROM {TABLE} ORDER BY `District Name`"), conn)['District Name'].tolist()
         states = pd.read_sql(text(f"SELECT DISTINCT State FROM {TABLE} ORDER BY State"), conn)["State"].tolist()
         schemes = pd.read_sql(text(f"SELECT DISTINCT Scheme FROM {TABLE} ORDER BY Scheme"), conn)["Scheme"].tolist()
 
+        # Build state → district mapping for JS dynamic filter
+        all_pairs = pd.read_sql(
+            text(f"SELECT DISTINCT State, `District Name` FROM {TABLE} ORDER BY State, `District Name`"),
+            conn
+        )
+        district_by_state = {}
+        for _, row in all_pairs.iterrows():
+            sk = row["State"]
+            district_by_state.setdefault(sk, []).append(row["District Name"])
+
+        import json
         return render_template("projects.html",
                 projects = df.to_dict('records'),
-                districts = districts, states = states, schemes=schemes,
+                states = states, schemes=schemes,
+                district_by_state=json.dumps(district_by_state),
                 selected_district = district, selected_state = state,
                 selected_scheme=scheme, anomaly_only=anomaly_only
                 )

@@ -5,3 +5,5 @@ GovTrack_Complete_Documentation.md
 docs/
 data/
 docs/
+.vscode/
+pipeline/auto_load.py

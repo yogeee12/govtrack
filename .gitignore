@@ -3,3 +3,5 @@ __pycache__/
 .env
 GovTrack_Complete_Documentation.md
 docs/
+data/
+docs/
